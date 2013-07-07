@@ -113,7 +113,7 @@ def parseAgesArgument(ages):
         if re.match(r'^\d+$', ageString):
             ageString = '%sd' % ageString
         
-        m = re.match(r'^(\d+)(i|h|d|m|y)$', ageString)
+        m = re.match(r'^(\d+)(i|h|d|w|m|y)$', ageString)
         if not m:
             clean = False
             break
