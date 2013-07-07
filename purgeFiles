@@ -176,6 +176,19 @@ def convertAgeEpochToAge(ageEpoch):
     age = (int(time.time()) - ageEpoch) / 60
     return age
 
+def minutes2text(minutes):
+    minutes = int(minutes)
+    for unit, divider in [('year', 1 * 60 * 24 * 365), ('month', 1 * 60 * 24 * 30), ('week', 1 * 60 * 24 * 7), ('day', 1 * 60 * 24), ('hour', 1 * 60), ('minute', 1)]:
+        res, rem = minutes / divider, minutes % divider
+        if res > 0:
+            return "%(number)d %(unit)s%(plural)s%(more)s" % {
+                'number': res,
+                'unit': unit,
+                'plural': 's' if res > 1 else '',
+                'more': ', %s' % minutes2text(rem) if rem > 0 else '',
+            }
+    return '0'
+
 # purge the specified directory
 def purge(directory, pattern, ages, force):
     # make sure the backup directory is sound
@@ -217,7 +230,7 @@ def purge(directory, pattern, ages, force):
         # lovely we found a keeper, so get the next file age to satisfy
         if keeper == True:
             fileAgeMinutes = convertAgeEpochToAge(fileAge)
-            print '%s: keeping this file of age %d minutes to satisfy age %d minutes' % (file[2], fileAgeMinutes, currentDesiredAge)
+            print '%s: keeping this file of age %s to satisfy age %s' % (file[2], minutes2text(fileAgeMinutes), minutes2text(currentDesiredAge))
             try:
                 currentDesiredAge = agesIterator.next()
             except StopIteration:
