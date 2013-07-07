@@ -239,7 +239,7 @@ def purge(directory, pattern, ages, force):
     # if we haven't made our way through all the requested ages, process them anyway, solely to message the user
     if completedDesiredAges == False:
         while True:
-            print 'no file to satisfy age %d' % currentDesiredAge
+            print 'no file to satisfy age %s' % minutes2text(currentDesiredAge)
             try:
                 currentDesiredAge = agesIterator.next()
             except StopIteration:
