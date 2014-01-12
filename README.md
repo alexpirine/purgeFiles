@@ -6,6 +6,7 @@ Read more here: http://www.johnandcailin.com/blog/john/smartly-purge-your-old-ba
 Usage: purgeFiles [OPTION]...
  -h, --help                          Print this help message
  -a, --ages=age1,age2                Desired ages to keep (by default, in days)
+ -c, --command=command               Command used to remove file/dir (ex. s3qlrm)
  -d, --directory=dir                 Target directory
  -p, --pattern=pattern               File pattern to match
  -f, --force                         Force deletion (no simulation mode)

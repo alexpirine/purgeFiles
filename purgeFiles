@@ -24,12 +24,13 @@ def main(argv):
     # set default behavior
     force = False
     ages = 'unset'
+    command = False
     directory = 'unset'
     pattern = '*'
 
     # process command line
     try:
-       opts, args = getopt.getopt(argv, 'ha:d:p:f', ['help', 'ages=', 'directory=', 'pattern=', 'force'])
+       opts, args = getopt.getopt(argv, 'ha:c:d:p:f', ['help', 'ages=', 'command=', 'directory=', 'pattern=', 'force'])
        if len(args) > 0:
           print 'ignoring args: %s' % args
     except getopt.GetoptError, err:
@@ -40,6 +41,8 @@ def main(argv):
        if opt in ('-h', '--help'):
            usage()
            sys.exit(2)
+       elif opt in ('-c', '--command'):
+           command = arg
        elif opt in ('-d', '--directory'):
            directory = arg
        elif opt in ('-p', '--pattern'):
@@ -59,7 +62,7 @@ def main(argv):
        usage()
 
     # purge the directory
-    purge(directory, pattern, ages, force)
+    purge(directory, pattern, ages, force, command)
 
 
 # print the usage message and bail
@@ -67,7 +70,8 @@ def usage():
     print 'Usage: purgeFiles [OPTION]...';
     print ' -h, --help                          Print this help message';
     print ' -a, --ages=age1,age2                Desired ages to keep (in days)';
-    print ' -d, --directory=dir                 Target directory';
+    print ' -c, --command=command               Command used to remove file/dir (ex. s3qlrm)';
+    print ' -d, --directory=dir                 Target directory (required)';
     print ' -p, --pattern=pattern               File pattern to match';
     print ' -f, --force                         Force deletion (no simulation mode)\n';
     print 'e.g. purgeFiles --ages=1,2,4,40 --directory=/tmp --pattern="*.txt"';
@@ -149,14 +153,18 @@ def getSortedDirList(directory, pattern):
     return sortedDirList
 
 # delete the file respecting the force mode
-def deleteFile(file, force):
+def deleteFile(file, force, command):
     baseName = file[2]
     fileName = file[1]
     if force == False:
         print '%s: Flagged for deletion' % baseName
     else:
-        # First check if we are removing a folder or a file...
-        if os.path.isdir(fileName):
+        # Check if defined remove comnnad, then
+        # check if we are removing a folder or a file...
+        if command:
+            os.system('%s "%s"' % (command, baseName))
+            print '%s: Delete' % baseName
+        elif os.path.isdir(fileName):
             shutil.rmtree(fileName)
             print '%s: Deleted Folder' % baseName
         elif os.path.isfile(fileName):
@@ -190,7 +198,7 @@ def minutes2text(minutes):
     return '0'
 
 # purge the specified directory
-def purge(directory, pattern, ages, force):
+def purge(directory, pattern, ages, force, command):
     # make sure the backup directory is sound
     checkBackupArea(directory)
 
@@ -217,7 +225,7 @@ def purge(directory, pattern, ages, force):
 
             # should we delete this file?
             if (completedDesiredAges == True) or ((fileAge < currentDesiredAgeEpoch) and (nextFileAge < currentDesiredAgeEpoch)):
-                deleteFile(file, force)
+                deleteFile(file, force, command)
             else:
                 keeper = True
         else:
@@ -225,7 +233,7 @@ def purge(directory, pattern, ages, force):
             if completedDesiredAges == False:
                 keeper = True
             else:
-                deleteFile(file, force)
+                deleteFile(file, force, command)
 
         # lovely we found a keeper, so get the next file age to satisfy
         if keeper == True:
